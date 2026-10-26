@@ -165,14 +165,14 @@ for (int dy = -1; dy &lt;= 1; dy++)
 
 <!-- 6. make -->
 <section class="slide" id="make" data-demo="make" data-title="make" style="--c:var(--c-sys)">
-  <div class="split">
+  <div class="split make-split">
     <div class="col">
       <span class="tag">Systemnära programmering · 1/3</span>
       <h2><code class="big">make</code>: ett kommando<br>för allt.</h2>
       <ul class="bullets">
         <li><b>Du lär dig make</b> för att bygga C-program, men det funkar för vilket projekt som helst.</li>
+        <li><b>Smart:</b> make bygger bara om det som ändrats. Kör <code>make up</code> två gånger och se.</li>
         <li><b>Vibekodning-tricket:</b> ge agenten regeln direkt från start, så slutar den gissa hur saker startas.</li>
-        <li><b>Börja enkelt:</b> <code>up</code>, <code>down</code>, <code>help</code>. Mer behövs sällan.</li>
       </ul>
       <div class="prompt">
         <div class="prompt-head">Till agenten:</div>
@@ -180,7 +180,19 @@ for (int dy = -1; dy &lt;= 1; dy++)
       </div>
     </div>
     <div class="col">
-      <div class="term" id="make-term" aria-live="polite"></div>
+      <div class="desk">
+        <div class="win term-win">
+          <div class="win-bar"><i></i><i></i><i></i><span>terminal: ~/bogo</span></div>
+          <div class="term" id="make-term" aria-live="polite"></div>
+        </div>
+        <div class="win bogo-win" id="bogo-win" hidden>
+          <div class="win-bar"><i></i><i></i><i></i><span>./bogo</span></div>
+          <div class="bogo-body">
+            <div class="bars" id="bogo-bars"></div>
+            <div class="bogo-stat" id="bogo-stat"></div>
+          </div>
+        </div>
+      </div>
       <div class="controls">
         <span class="stat">Kör:</span>
         <button class="btn ghost mono" data-make="help">make help</button>
@@ -188,7 +200,7 @@ for (int dy = -1; dy &lt;= 1; dy++)
         <button class="btn ghost mono" data-make="down">make down</button>
         <button class="btn ghost mono" data-make="cat">cat Makefile</button>
       </div>
-      <p class="caption">Det här är den riktiga Makefilen som startar den här presentationen.</p>
+      <p class="caption">Bogosort: blanda tills det råkar bli sorterat. Världens sämsta sorteringsalgoritm.</p>
     </div>
   </div>
 </section>
@@ -326,14 +338,14 @@ for (int dy = -1; dy &lt;= 1; dy++)
   </div>
 </section>
 
-<!-- 11. PVT -->
+<!-- 11. PVT: team -->
 <section class="slide" id="pvt" data-demo="pvt" data-title="PVT" style="--c:var(--c-pvt)">
-  <span class="tag">PVT</span>
-  <h2>Vibekodning, git-projekt och <span class="hl">teamwork</span>.</h2>
+  <span class="tag">PVT · 1/3</span>
+  <h2>Git-projekt och <span class="hl">teamwork</span>.</h2>
   <div class="cards3">
-    <div class="card"><b>Vibekodning</b><p>Du beskriver, agenten skriver, du granskar. Du är fortfarande ansvarig för koden.</p></div>
-    <div class="card"><b>Git-projekt</b><p>Branches, pull requests och code review i ett riktigt projekt.</p></div>
-    <div class="card"><b>Teamwork</b><p>Dela upp arbetet, prata med varandra, lös konflikter ihop.</p></div>
+    <div class="card"><b>Dela upp</b><p>Alla jobbar på var sin branch, så ingen trampar på någon annan.</p></div>
+    <div class="card"><b>Granska varandra</b><p>Pull requests och code review innan något hamnar i main.</p></div>
+    <div class="card"><b>Lös konflikter ihop</b><p>Ibland ändrar två personer samma sak. Då pratar man.</p></div>
   </div>
   <div class="panel pvt-panel">
     <svg id="pvt-graph" viewBox="0 0 1100 170" aria-label="Git-graf för teamet"></svg>
@@ -347,7 +359,48 @@ for (int dy = -1; dy &lt;= 1; dy++)
   </div>
 </section>
 
-<!-- 12. Slut -->
+<!-- 12. PVT: Docker -->
+<section class="slide" id="docker" data-demo="docker" data-title="Docker" style="--c:var(--c-pvt)">
+  <span class="tag">PVT · 2/3</span>
+  <h2>Docker: hejdå, ”men det funkar ju på <span class="hl">min</span> dator!”</h2>
+  <p class="lead-s">Utan Docker skickar du receptet och hoppas att alla har samma ingredienser hemma. Med Docker skickar du en färdig <b>matlåda</b>: appen och allt den behöver, packat i en låda som funkar likadant överallt.</p>
+  <div class="dk-ctl">
+    <div class="seg" id="dk-mode">
+      <button class="active" data-dk="0">Utan Docker</button>
+      <button data-dk="1">Med Docker 📦</button>
+    </div>
+    <button class="btn" id="dk-run">▶ Starta appen på alla datorer</button>
+  </div>
+  <div class="pcs" id="dk-machines"></div>
+  <p class="explain" id="dk-explain"></p>
+</section>
+
+<!-- 13. PVT: vibekodning -->
+<section class="slide" id="vibe" data-demo="vibe" data-title="Vibekodning" style="--c:var(--c-pvt)">
+  <div class="split vibe-split">
+    <div class="col">
+      <span class="tag">PVT · 3/3</span>
+      <h2>Vibekodning: den här presentationen är vibekodad.</h2>
+      <div class="chat">
+        <div class="bubble me">Gör en interaktiv PowerPoint om kurserna. Läs riktlinjerna.</div>
+        <div class="bubble me">Git-exemplet är för tekniskt. Gör ett plattformsspel där man fastnar och måste återställa med git.</div>
+        <div class="bubble me">Byt databasexemplet till Hästinder. 🐴</div>
+        <div class="bubble me">För vibekodning … kanske inception, eftersom det här är vibekodat?</div>
+        <div class="bubble ai">Klart! Presentationen visar nu sig själv. 🌀</div>
+      </div>
+      <p class="note">Jag beskrev, agenten skrev koden, jag testade och sa till när något blev fel. Du är fortfarande den som bestämmer över koden.</p>
+    </div>
+    <div class="col center">
+      <div class="laptop">
+        <div class="laptop-screen"><iframe id="inception" title="Den här presentationen, inuti sig själv" tabindex="-1"></iframe></div>
+        <div class="laptop-base"></div>
+      </div>
+      <p class="caption">Vi måste gå djupare.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 14. Slut -->
 <section class="slide end-slide" data-title="Slut">
   <h2>Sju kurser. Sju superkrafter.</h2>
   <div class="end-grid">
@@ -357,7 +410,7 @@ for (int dy = -1; dy &lt;= 1; dy++)
     <button class="end-card" style="--c:var(--c-sys)" data-goto="make"><b>Systemnära</b><span>make, trådar, signaler</span></button>
     <button class="end-card" style="--c:var(--c-db)" data-goto="db"><b>Databaser</b><span>Hosta din egen sida</span></button>
     <button class="end-card" style="--c:var(--c-emb)" data-goto="emb"><b>Inbyggda</b><span>Bygg dumma grejer</span></button>
-    <button class="end-card" style="--c:var(--c-pvt)" data-goto="pvt"><b>PVT</b><span>Vibekodning i team</span></button>
+    <button class="end-card" style="--c:var(--c-pvt)" data-goto="pvt"><b>PVT</b><span>Team, Docker, vibekodning</span></button>
     <div class="end-card q"><b>Frågor?</b><span>Klicka på en kurs för att hoppa tillbaka</span></div>
   </div>
 </section>
@@ -367,7 +420,7 @@ for (int dy = -1; dy &lt;= 1; dy++)
 
 <nav class="hud" aria-label="Bildnavigering">
   <button id="prev" aria-label="Föregående bild">←</button>
-  <span id="counter">1 / 12</span>
+  <span id="counter">1 / 14</span>
   <button id="next" aria-label="Nästa bild">→</button>
 </nav>
 <div class="progress"><div id="progress"></div></div>

@@ -12,12 +12,14 @@ Varje bild har något att klicka på:
 | OOP Java | Refaktorering i tre steg: spagetti → klass → återanvänd i ett nytt projekt |
 | Git | Plattformsspel där du fastnar i en grop: 💾 Spara (`git add` + `git commit`) och ↩ Återställ (`git restore`) |
 | App Java | En att-göra-app med en "röntgen" som visar datan bakom |
-| make | Terminal som kör den här Makefilen, plus ett tips för vibekodning |
+| make | Terminal med `make up/down/help` för ett bogosort-projekt, som öppnas i ett eget fönster |
 | Trådar | Mandelbrot som räknas ut av 1–8 simulerade trådar |
 | Signaler | Signal/slot som i spelmotorer, där du kopplar in och ur lyssnare |
 | Databaser | Hästinder: swipea på hästar och se `swipes` och `matches` fyllas i databasen live |
 | Inbyggda | 8 lysdioder som ett register, och en servo som slår till väckarklockan |
-| PVT | En git-graf för ett team, steg för steg |
+| PVT 1/3 | En git-graf för ett team, steg för steg |
+| PVT 2/3 | Docker som matlåda: fyra datorer, "funkar på min dator" utan Docker, alla funkar med |
+| PVT 3/3 | Vibekodning: promptarna bakom presentationen, och presentationen inuti sig själv (inception) |
 
 ## Förutsättningar
 

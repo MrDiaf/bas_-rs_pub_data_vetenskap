@@ -344,35 +344,61 @@ demos.app = (() => {
 })();
 
 demos.make = (() => {
-  const term = $('#make-term');
-  let running = false, busy = false;
+  const term = $('#make-term'), win = $('#bogo-win'), barsEl = $('#bogo-bars'), stat = $('#bogo-stat');
+  const N = 5;
+  let built = false, running = false, busy = false, timer = 0, arr = [], tries = 0, total = 0, pause = 0;
+
+  function drawBars(sorted) {
+    barsEl.classList.toggle('sorted', sorted);
+    barsEl.innerHTML = arr.map(v => `<div style="height:${v / N * 100}%">${v}</div>`).join('');
+  }
+  function shuffle() {
+    for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
+  }
+  function tick() {
+    if (pause) { if (--pause === 0) { tries = 0; shuffle(); } return; }
+    shuffle(); tries++; total++;
+    const sorted = arr.every((v, i) => !i || arr[i - 1] <= v);
+    drawBars(sorted);
+    stat.innerHTML = sorted
+      ? `<span class="ok">Sorterad efter ${tries} försök! 🎉</span><br>kör igen om en stund…`
+      : `blandar… försök <b>${tries}</b><br>sorterad? nej.`;
+    if (sorted) pause = 60;
+  }
+  const play = () => { clearInterval(timer); timer = setInterval(tick, 45); };
+
   const OUT = {
     help: () => `Tillgängliga kommandon:
 
-  make help     Visa den här hjälpen
-  make up       Starta presentationen lokalt
-  make down     Stoppa den lokala servern
-  make status   Visa om servern kör
-  make test     Kolla JavaScript-syntax och relativa länkar
-  make deploy   Kopiera till ~/public_html på itchy`,
-    up: () => running
-      ? '<span class="dim">Servern kör redan: http://127.0.0.1:8080/</span>'
-      : (running = true, `Startar lokal server på port 8080…
-<span class="ok">Klart!</span> Öppna http://127.0.0.1:8080/
+  make help   Visa den här hjälpen
+  make up     Bygg och starta bogosort
+  make down   Stoppa bogosort`,
+    up: () => {
+      if (running) return '<span class="dim">make: \'bogo\' är redan byggd, hoppar över gcc.</span>\nbogo kör redan. Den blandar fortfarande…';
+      const build = built
+        ? '<span class="dim">make: \'bogo\' är redan byggd, hoppar över gcc.</span>'
+        : 'gcc -O2 -o bogo bogo.c';
+      built = running = true;
+      arr = Array.from({ length: N }, (_, i) => i + 1); shuffle(); tries = 0; pause = 0;
+      win.hidden = false; drawBars(false); play();
+      return `${build}\n./bogo &\n<span class="ok">Startade bogo</span> (pid ${1000 + Math.floor(Math.random() * 9000)}). Lycka till…`;
+    },
+    down: () => {
+      if (!running) return '<span class="dim">bogo kör inte.</span>';
+      running = false; clearInterval(timer); win.hidden = true;
+      return `pkill bogo\n<span class="ok">Stoppade bogo</span> efter ${total} blandningar totalt.`;
+    },
+    cat: () => highlight(`bogo: bogo.c        # bygg bara om bogo.c ändrats
+	gcc -O2 -o bogo bogo.c
 
-Kör \`make help\` för fler kommandon.`),
-    down: () => running ? (running = false, '<span class="ok">Servern stoppad.</span>') : '<span class="dim">Servern kör inte.</span>',
-    cat: () => highlight(`# (förenklad)
-PORT ?= 8080
+up: bogo            ## Bygg och starta bogosort
+	./bogo &
 
-help:  ## Visa den här hjälpen
-	@grep '##' Makefile
+down:               ## Stoppa bogosort
+	pkill bogo
 
-up:    ## Starta presentationen lokalt
-	python3 -m http.server $(PORT) &
-
-down:  ## Stoppa den lokala servern
-	kill $$(cat .runtime/server.pid)`, 'make'),
+help:               ## Visa den här hjälpen
+	@grep '##' Makefile`, 'make'),
   };
   const CMD = { help: 'make help', up: 'make up', down: 'make down', cat: 'cat Makefile' };
   async function run(k) {
@@ -386,8 +412,11 @@ down:  ## Stoppa den lokala servern
     busy = false;
   }
   $$('[data-make]').forEach(b => b.addEventListener('click', () => run(b.dataset.make)));
-  term.innerHTML = '<span class="dim"># Klicka på ett kommando nedan.</span>\n\n';
-  return { start() {}, stop() {} };
+  term.innerHTML = '<span class="dim"># Ett litet C-projekt: bogosort.\n# Klicka på ett kommando nedan.</span>\n\n';
+  return {
+    start() { if (running) play(); },
+    stop() { clearInterval(timer); },
+  };
 })();
 
 demos.threads = (() => {
@@ -697,6 +726,75 @@ demos.pvt = (() => {
   $('#pvt-reset').onclick = reset;
   reset();
   return { start() {}, stop() {} };
+})();
+
+demos.docker = (() => {
+  const MACHINES = [
+    { icon: '💻', name: 'Alvas laptop', os: 'Linux', has: ['Python 3.12', 'alla bibliotek'], err: null },
+    { icon: '💻', name: 'Bens laptop', os: 'Windows', has: ['Python 3.8'], bad: 0, err: 'Fel Python-version 😩' },
+    { icon: '🍏', name: 'Cias Mac', os: 'macOS', has: ['Python 3.12', 'saknar bibliotek'], bad: 1, err: 'Saknar ett bibliotek 😵' },
+    { icon: '🖥️', name: 'Servern', os: 'Linux', has: ['inget installerat'], bad: 0, err: 'Python finns inte ens 💀' },
+  ];
+  const box = $('#dk-machines'), explain = $('#dk-explain');
+  let docker = false, token = 0;
+
+  function render() {
+    box.innerHTML = MACHINES.map((m, i) => `<div class="pc" data-i="${i}">
+      <div class="m-head"><span>${m.icon}</span><div>${m.name}<small>${m.os}</small></div></div>
+      <div class="m-screen">–</div>
+      <div class="m-has">${docker ? '<span>Docker</span>' : m.has.map((h, k) => `<span class="${k === m.bad ? 'bad' : ''}">${h}</span>`).join('')}</div>
+    </div>`).join('');
+    explain.innerHTML = docker
+      ? 'Varje dator behöver bara ha Docker. Allt annat ligger i lådan.'
+      : 'Alla har installerat olika saker på sina datorer…';
+  }
+  async function run() {
+    const my = ++token;
+    render();
+    const cards = $$('.pc', box);
+    cards.forEach(c => { $('.m-screen', c).innerHTML = '<div class="spin"></div>'; });
+    let ok = 0;
+    for (const [i, c] of cards.entries()) {
+      if (docker) $('.m-has', c).insertAdjacentHTML('beforeend', '<span class="box">📦 app + Python 3.12 + bibliotek</span>');
+      await sleep(550);
+      if (my !== token) return;
+      const scr = $('.m-screen', c), m = MACHINES[i], works = docker || !m.err;
+      scr.className = 'm-screen ' + (works ? 'ok' : 'err');
+      scr.textContent = works ? '✓ Appen kör! 🐴' : '✗ ' + m.err;
+      ok += works;
+    }
+    if (docker) explain.innerHTML = `<b>${ok} av 4</b> funkar. Samma låda, samma resultat, oavsett dator.`;
+    else {
+      cards[0].insertAdjacentHTML('beforeend', '<div class="say">Men det funkar ju på min dator! 🤷</div>');
+      explain.innerHTML = `<b>${ok} av 4</b> funkar. Testa med Docker.`;
+    }
+  }
+  $('#dk-mode').addEventListener('click', e => {
+    const b = e.target.closest('[data-dk]'); if (!b) return;
+    docker = b.dataset.dk === '1'; token++;
+    $$('[data-dk]').forEach(x => x.classList.toggle('active', x === b));
+    render();
+  });
+  $('#dk-run').onclick = run;
+  render();
+  return { start() {}, stop() { token++; render(); } };
+})();
+
+demos.vibe = (() => {
+  // how many presentations deep we are; stop nesting after a few levels
+  let depth = 0;
+  for (let w = window; w !== w.parent; w = w.parent) depth++;
+  if (depth) document.body.classList.add('embed');
+  const frame = $('#inception');
+  return {
+    start() {
+      if (frame.getAttribute('src') || frame.dataset.deepest) return;
+      if (depth >= 3) { frame.dataset.deepest = 1; frame.insertAdjacentHTML('afterend', '<div class="deepest">🌀</div>'); return; }
+      const n = $$('.slide').indexOf($('#vibe')) + 1;
+      frame.src = `index.html?djup=${depth + 1}#${n}`;
+    },
+    stop() {},
+  };
 })();
 
 /* ---------- slide navigation ---------- */
