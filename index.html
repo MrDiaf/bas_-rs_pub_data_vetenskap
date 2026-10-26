@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vad lär du dig?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="viewport">
+<main class="stage" id="stage">
+
+<!-- 1. Titel -->
+<section class="slide title-slide" data-title="Start">
+  <p class="eyebrow">Datavetenskap · en interaktiv rundtur</p>
+  <h1>Vad lär du dig<br><span class="grad">egentligen?</span></h1>
+  <p class="lead">Sju kurser, sju superkrafter. Varje bild går att klicka på.</p>
+  <div class="roadmap">
+    <button class="chip" style="--c:var(--c-ipc)" data-goto="ipc">IPC</button>
+    <button class="chip" style="--c:var(--c-oop)" data-goto="oop">OOP Java</button>
+    <button class="chip" style="--c:var(--c-app)" data-goto="app">App Java</button>
+    <button class="chip" style="--c:var(--c-sys)" data-goto="make">Systemnära</button>
+    <button class="chip" style="--c:var(--c-db)" data-goto="db">Databaser</button>
+    <button class="chip" style="--c:var(--c-emb)" data-goto="emb">Inbyggda</button>
+    <button class="chip" style="--c:var(--c-pvt)" data-goto="pvt">PVT</button>
+  </div>
+  <p class="keys"><kbd>←</kbd> <kbd>→</kbd> bläddra · <kbd>F</kbd> helskärm</p>
+</section>
+
+<!-- 2. IPC -->
+<section class="slide" id="ipc" data-demo="life" data-title="IPC" style="--c:var(--c-ipc)">
+  <div class="split">
+    <div class="col">
+      <span class="tag">IPC · Imperativ programmering i C</span>
+      <h2>Lär dig ett språk.<br>Förstå alla.</h2>
+      <p>Variabler, villkor, loopar, funktioner, arrayer. Samma mönster finns i varje språk du kommer att möta. I C ser du dessutom hur datorn faktiskt jobbar: minne, pekare, bytes.</p>
+      <div class="tabs" data-tabs>
+        <div class="tab-bar">
+          <button class="active" data-tab="0">C</button>
+          <button data-tab="1">Python</button>
+          <button data-tab="2">Java</button>
+        </div>
+        <pre class="code" data-pane="0" data-lang="c">// räkna grannar runt cellen (x, y)
+for (int dy = -1; dy &lt;= 1; dy++)
+  for (int dx = -1; dx &lt;= 1; dx++)
+    if (dx || dy)
+      n += grid[(y+dy+H)%H][(x+dx+W)%W];</pre>
+        <pre class="code" data-pane="1" data-lang="py" hidden># räkna grannar runt cellen (x, y)
+for dy in (-1, 0, 1):
+    for dx in (-1, 0, 1):
+        if dx or dy:
+            n += grid[(y+dy) % H][(x+dx) % W]</pre>
+        <pre class="code" data-pane="2" data-lang="java" hidden>// räkna grannar runt cellen (x, y)
+for (int dy = -1; dy &lt;= 1; dy++)
+  for (int dx = -1; dx &lt;= 1; dx++)
+    if (dx != 0 || dy != 0)
+      n += grid[(y+dy+H)%H][(x+dx+W)%W];</pre>
+      </div>
+      <p class="note">Spelet till höger kör exakt den här loopen, fast i JavaScript.</p>
+    </div>
+    <div class="col center">
+      <div class="panel life-panel">
+        <canvas id="life" width="480" height="480" aria-label="Game of Life: klicka och dra för att rita celler"></canvas>
+        <div class="controls">
+          <button id="life-play" class="btn">Pausa</button>
+          <button id="life-step" class="btn ghost">Ett steg</button>
+          <button id="life-rand" class="btn ghost">Slumpa</button>
+          <button id="life-glider" class="btn ghost">Glidare</button>
+          <button id="life-clear" class="btn ghost">Rensa</button>
+          <span class="stat">gen <b id="life-gen">0</b></span>
+        </div>
+      </div>
+      <p class="caption">Conways Game of Life: 2–3 grannar = överlever, 3 grannar = föds. Rita med musen.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3. OOP -->
+<section class="slide" id="oop" data-demo="refactor" data-title="OOP Java" style="--c:var(--c-oop)">
+  <span class="tag">OOP · Objektorienterad programmering i Java</span>
+  <h2>Slut på spagettikod.</h2>
+  <p class="lead-s">Tänk LEGO i stället för lim: lyft ut en bit, ge den ett namn, och använd den igen i nästa projekt.</p>
+  <div class="steps" id="ref-steps">
+    <button class="step active" data-step="0"><b>1</b> Spagetti</button>
+    <button class="step" data-step="1"><b>2</b> Refaktorera</button>
+    <button class="step" data-step="2"><b>3</b> Flytta till nytt projekt</button>
+  </div>
+  <div class="projects">
+    <div class="project">
+      <div class="project-head"><span class="dot"></span>Projekt: <b>Yatzy</b></div>
+      <div class="files" id="proj-yatzy"></div>
+    </div>
+    <div class="arrow-mid" id="ref-arrow">→</div>
+    <div class="project">
+      <div class="project-head"><span class="dot"></span>Projekt: <b>Fia med knuff</b></div>
+      <div class="files" id="proj-fia"></div>
+    </div>
+  </div>
+  <p class="explain" id="ref-explain"></p>
+</section>
+
+<!-- 4. Git -->
+<section class="slide" id="git" data-demo="git" data-title="Git" style="--c:var(--c-git)">
+  <div class="split">
+    <div class="col">
+      <span class="tag">OOP Java · och…</span>
+      <h2 class="shout">GIT!!!!!!!</h2>
+      <p>Git är en ångra-knapp för hela projektet. Varje <code>commit</code> är en sparpunkt du alltid kan gå tillbaka till, och det är så hela team jobbar i samma kod utan att skriva över varandra.</p>
+      <ol class="howto">
+        <li>Skriv lite kod</li>
+        <li><code>git commit</code>, alltså spara en punkt</li>
+        <li>Förstör allt (det händer)</li>
+        <li>Klicka på en gammal commit och res tillbaka i tiden</li>
+      </ol>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <div class="file-head"><span>Spel.java</span><span class="dirty" id="git-dirty" hidden>● ändrad</span></div>
+        <pre class="code editor" id="git-file" data-lang="java"></pre>
+        <div class="controls">
+          <button class="btn ghost" id="git-write">Skriv kod</button>
+          <button class="btn" id="git-commit">git commit</button>
+          <button class="btn danger" id="git-break">Förstör allt</button>
+        </div>
+        <div class="timeline" id="git-timeline"></div>
+        <div class="term small" id="git-log"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. App Java -->
+<section class="slide" id="app" data-demo="app" data-title="App Java" style="--c:var(--c-app)">
+  <div class="split">
+    <div class="col">
+      <span class="tag">App Java · Apputveckling i Java</span>
+      <h2>Lär dig frontend:<br>det användaren ser.</h2>
+      <p>Knappar, listor, färger, hur det känns att klicka. All logik i världen hjälper inte om ingen förstår hur appen ska användas.</p>
+      <p>Prova appen. Slå sedan på <b>röntgen</b> och se samma data som programmet ser den.</p>
+      <label class="switch"><input type="checkbox" id="app-xray"><span></span>Röntgen: visa vad som finns bakom</label>
+    </div>
+    <div class="col center">
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen" id="app-ui">
+          <div class="app-bar">Att göra</div>
+          <form class="app-add" id="app-form">
+            <input id="app-input" maxlength="40" placeholder="Ny uppgift…" autocomplete="off">
+            <button class="btn">+</button>
+          </form>
+          <ul class="app-list" id="app-list"></ul>
+          <div class="app-foot" id="app-foot"></div>
+        </div>
+        <pre class="phone-screen code xray" id="app-raw" data-lang="java" hidden></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. make -->
+<section class="slide" id="make" data-demo="make" data-title="make" style="--c:var(--c-sys)">
+  <div class="split">
+    <div class="col">
+      <span class="tag">Systemnära programmering · 1/3</span>
+      <h2><code class="big">make</code>: ett kommando<br>för allt.</h2>
+      <ul class="bullets">
+        <li><b>Du lär dig make</b> för att bygga C-program, men det funkar för vilket projekt som helst.</li>
+        <li><b>Vibekodning-tricket:</b> ge agenten regeln direkt från start, så slutar den gissa hur saker startas.</li>
+        <li><b>Börja enkelt:</b> <code>up</code>, <code>down</code>, <code>help</code>. Mer behövs sällan.</li>
+      </ul>
+      <div class="prompt">
+        <div class="prompt-head">Till agenten:</div>
+        <p>”Allt i projektet ska startas med <code>make up</code>, stoppas med <code>make down</code>, och <code>make help</code> listar alla kommandon. Lägg reglerna i en Makefile och använd den själv.”</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="term" id="make-term" aria-live="polite"></div>
+      <div class="controls">
+        <span class="stat">Kör:</span>
+        <button class="btn ghost mono" data-make="help">make help</button>
+        <button class="btn ghost mono" data-make="up">make up</button>
+        <button class="btn ghost mono" data-make="down">make down</button>
+        <button class="btn ghost mono" data-make="cat">cat Makefile</button>
+      </div>
+      <p class="caption">Det här är den riktiga Makefilen som startar den här presentationen.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 7. Trådar -->
+<section class="slide" id="threads" data-demo="threads" data-title="Trådar" style="--c:var(--c-sys)">
+  <div class="split">
+    <div class="col">
+      <span class="tag">Systemnära programmering · 2/3</span>
+      <h2>Multitrådat: dela upp<br>och kör snabbare.</h2>
+      <p>En bild består av rader som inte beror på varandra. Ge varje tråd sin egen bit, så räknar de samtidigt på var sin processorkärna.</p>
+      <p>Som fyra kockar som hackar var sin grönsak i stället för en kock som hackar allt.</p>
+      <p class="note" id="cores"></p>
+      <p class="note">Svårt på riktigt: när trådar delar data måste de turas om (mutex). Det lär du dig också.</p>
+    </div>
+    <div class="col center">
+      <div class="panel">
+        <canvas id="mandel" width="480" height="300" aria-label="Mandelbrot som räknas ut av flera trådar"></canvas>
+        <div class="thread-bars" id="thread-bars"></div>
+        <div class="controls">
+          <label class="range">Trådar <input type="range" id="thr-n" min="1" max="8" value="1"><b id="thr-label">1</b></label>
+          <button class="btn" id="thr-run">Kör</button>
+          <span class="stat">tid <b id="thr-time">–</b></span>
+        </div>
+        <div class="results" id="thr-results"></div>
+      </div>
+      <p class="caption">Simulering: varje tråd räknar en rad per bildruta. Testa 1, sedan 8.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 8. Signaler -->
+<section class="slide" id="signals" data-demo="signals" data-title="Signaler" style="--c:var(--c-sys)">
+  <span class="tag">Systemnära programmering · 3/3</span>
+  <h2>Signaler: ”säg till när något händer”.</h2>
+  <p class="lead-s">Ett klassiskt mönster i spelmotorer (Godot, Unity). Spelaren vet inte vem som lyssnar, så du kan koppla in nya saker utan att röra spelarens kod.</p>
+  <div class="sig-wrap">
+    <div class="sig-emitter">
+      <div class="player" id="sig-player"><div class="eyes"></div></div>
+      <button class="btn" id="sig-hit">player.hit.emit(10)</button>
+      <code class="small-code" id="sig-slots"></code>
+    </div>
+    <svg class="sig-wires" id="sig-wires" viewBox="0 0 200 320" preserveAspectRatio="none" aria-hidden="true"></svg>
+    <div class="sig-listeners" id="sig-listeners">
+      <div class="listener" data-l="hud">
+        <label class="switch sm"><input type="checkbox" checked><span></span></label>
+        <div class="l-body"><b>HUD</b> <code>hud.update_health</code><div class="hp"><div id="sig-hp"></div></div></div>
+      </div>
+      <div class="listener" data-l="sound">
+        <label class="switch sm"><input type="checkbox" checked><span></span></label>
+        <div class="l-body"><b>Ljud</b> <code>audio.play("aj")</code><div class="l-out" id="sig-sound">…</div></div>
+      </div>
+      <div class="listener" data-l="camera">
+        <label class="switch sm"><input type="checkbox" checked><span></span></label>
+        <div class="l-body"><b>Kamera</b> <code>camera.shake</code><div class="l-out">skakar skärmen</div></div>
+      </div>
+      <div class="listener" data-l="ach">
+        <label class="switch sm"><input type="checkbox"><span></span></label>
+        <div class="l-body"><b>Prestationer</b> <code>achievements.count</code><div class="l-out" id="sig-ach">0 träffar</div></div>
+      </div>
+    </div>
+  </div>
+  <p class="note">I C möter du samma idé från operativsystemet: <kbd>Ctrl</kbd>+<kbd>C</kbd> skickar <code>SIGINT</code> till ditt program, och du bestämmer vilken funktion som körs.</p>
+</section>
+
+<!-- 9. Databaser -->
+<section class="slide" id="db" data-demo="db" data-title="Databaser" style="--c:var(--c-db)">
+  <span class="tag">Introduktion till databaser</span>
+  <h2>Hosta din egen server, och en hemsida <span class="hl">som den här!</span></h2>
+  <p class="lead-s">Du tittar just nu på <code id="db-url">…</code>. Klicka på "Skicka förfrågan" och följ vad som händer.</p>
+  <div class="flow" id="db-flow">
+    <div class="node" data-i="0"><b>Webbläsare</b><span>du</span></div>
+    <div class="node" data-i="1"><b>Webbserver</b><span id="db-host">people.cs.umu.se</span></div>
+    <div class="node" data-i="2"><b>PHP</b><span>kör din kod</span></div>
+    <div class="node" data-i="3"><b>SQLite</b><span>sparar data</span></div>
+    <div class="packet" id="db-packet"></div>
+  </div>
+  <div class="flow-ctl">
+    <button class="btn" id="db-send">Skicka förfrågan</button>
+    <span class="flow-msg" id="db-msg"></span>
+  </div>
+  <div class="sql">
+    <div class="sql-q">
+      <button class="btn ghost mono" data-q="all">SELECT * FROM kurser;</button>
+      <button class="btn ghost mono" data-q="java">… WHERE sprak = 'Java';</button>
+      <button class="btn ghost mono" data-q="order">… ORDER BY namn;</button>
+      <button class="btn ghost mono" data-q="count">SELECT sprak, COUNT(*) … GROUP BY sprak;</button>
+    </div>
+    <table class="sql-t" id="db-table"></table>
+  </div>
+</section>
+
+<!-- 10. Inbyggda -->
+<section class="slide" id="emb" data-demo="emb" data-title="Inbyggda" style="--c:var(--c-emb)">
+  <div class="split">
+    <div class="col">
+      <span class="tag">Inbyggda system</span>
+      <h2>Bli ingenjör.<br>Bygg dumma grejer.</h2>
+      <p>Mikrokontroller, sensorer, motorer, lysdioder. Du lär dig styra hårdvara med kod, bit för bit. Typ som Michael Reeves, fast med lite mer koll på vad du gör.</p>
+      <ul class="bullets goofy">
+        <li>Väckarklocka som slår tillbaka</li>
+        <li>Laser som jagar katten</li>
+        <li>Dörrklocka som spelar fel låt varje gång</li>
+      </ul>
+    </div>
+    <div class="col">
+      <div class="panel board">
+        <div class="board-label">8 lysdioder = 8 bitar i ett register. Klicka!</div>
+        <div class="leds" id="leds"></div>
+        <pre class="code" id="led-code" data-lang="c"></pre>
+        <div class="controls">
+          <button class="btn ghost" id="led-run">Springande ljus</button>
+          <button class="btn ghost" id="led-count">Räkna binärt</button>
+          <button class="btn ghost" id="led-off">Släck</button>
+        </div>
+      </div>
+      <div class="panel goofy-machine">
+        <svg viewBox="0 0 320 130" class="machine" aria-hidden="true">
+          <rect x="10" y="112" width="300" height="10" rx="3" class="m-floor"/>
+          <g id="clock">
+            <rect x="200" y="72" width="70" height="40" rx="10" class="m-clock"/>
+            <text x="235" y="98" text-anchor="middle" class="m-clock-t" id="clock-t">07:00</text>
+            <rect x="222" y="64" width="26" height="8" rx="3" class="m-btn"/>
+          </g>
+          <g id="arm">
+            <rect x="52" y="49" width="186" height="12" rx="6" class="m-arm"/>
+          </g>
+          <rect x="40" y="62" width="34" height="50" rx="4" class="m-servo"/>
+          <circle cx="57" cy="55" r="9" class="m-pivot"/>
+        </svg>
+        <div class="controls">
+          <button class="btn" id="goofy">Gör något dumt</button>
+          <span class="stat" id="goofy-msg">servo väntar…</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11. PVT -->
+<section class="slide" id="pvt" data-demo="pvt" data-title="PVT" style="--c:var(--c-pvt)">
+  <span class="tag">PVT</span>
+  <h2>Vibekodning, git-projekt och <span class="hl">teamwork</span>.</h2>
+  <div class="cards3">
+    <div class="card"><b>Vibekodning</b><p>Du beskriver, agenten skriver, du granskar. Du är fortfarande ansvarig för koden.</p></div>
+    <div class="card"><b>Git-projekt</b><p>Branches, pull requests och code review i ett riktigt projekt.</p></div>
+    <div class="card"><b>Teamwork</b><p>Dela upp arbetet, prata med varandra, lös konflikter ihop.</p></div>
+  </div>
+  <div class="panel pvt-panel">
+    <svg id="pvt-graph" viewBox="0 0 1100 170" aria-label="Git-graf för teamet"></svg>
+    <div class="pvt-bottom">
+      <div class="controls">
+        <button class="btn" id="pvt-next">Nästa steg i projektet</button>
+        <button class="btn ghost" id="pvt-reset">Börja om</button>
+      </div>
+      <div class="pvt-log" id="pvt-log" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 12. Slut -->
+<section class="slide end-slide" data-title="Slut">
+  <h2>Sju kurser. Sju superkrafter.</h2>
+  <div class="end-grid">
+    <button class="end-card" style="--c:var(--c-ipc)" data-goto="ipc"><b>IPC</b><span>Mönstren bakom alla språk</span></button>
+    <button class="end-card" style="--c:var(--c-oop)" data-goto="oop"><b>OOP Java</b><span>Återanvändbar kod + git</span></button>
+    <button class="end-card" style="--c:var(--c-app)" data-goto="app"><b>App Java</b><span>Frontend</span></button>
+    <button class="end-card" style="--c:var(--c-sys)" data-goto="make"><b>Systemnära</b><span>make, trådar, signaler</span></button>
+    <button class="end-card" style="--c:var(--c-db)" data-goto="db"><b>Databaser</b><span>Hosta din egen sida</span></button>
+    <button class="end-card" style="--c:var(--c-emb)" data-goto="emb"><b>Inbyggda</b><span>Bygg dumma grejer</span></button>
+    <button class="end-card" style="--c:var(--c-pvt)" data-goto="pvt"><b>PVT</b><span>Vibekodning i team</span></button>
+    <div class="end-card q"><b>Frågor?</b><span>Klicka på en kurs för att hoppa tillbaka</span></div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<nav class="hud" aria-label="Bildnavigering">
+  <button id="prev" aria-label="Föregående bild">←</button>
+  <span id="counter">1 / 12</span>
+  <button id="next" aria-label="Nästa bild">→</button>
+</nav>
+<div class="progress"><div id="progress"></div></div>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

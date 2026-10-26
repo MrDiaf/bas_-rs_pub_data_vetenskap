@@ -1,0 +1,6 @@
+Options -Indexes
+DirectoryIndex index.html
+
+<FilesMatch "^(README\.md|Makefile|\.gitignore)$">
+    Require all denied
+</FilesMatch>
