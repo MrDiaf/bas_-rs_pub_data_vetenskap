@@ -104,26 +104,29 @@ for (int dy = -1; dy &lt;= 1; dy++)
 
 <!-- 4. Git -->
 <section class="slide" id="git" data-demo="git" data-title="Git" style="--c:var(--c-git)">
-  <div class="split">
+  <div class="split git-split">
     <div class="col">
       <span class="tag">OOP Java · och…</span>
       <h2 class="shout">GIT!!!!!!!</h2>
-      <p>Git är en ångra-knapp för hela projektet. Varje <code>commit</code> är en sparpunkt du alltid kan gå tillbaka till, och det är så hela team jobbar i samma kod utan att skriva över varandra.</p>
-      <ol class="howto">
-        <li>Skriv lite kod</li>
-        <li><code>git commit</code>, alltså spara en punkt</li>
-        <li>Förstör allt (det händer)</li>
-        <li>Klicka på en gammal commit och res tillbaka i tiden</li>
-      </ol>
+      <p>Git är spara-knappen för din kod, precis som i ett spel.</p>
+      <ul class="savelist">
+        <li><span class="key">💾 Spara</span><span><code>git add .</code> + <code>git commit -m "…"</code><small>spara hur det ser ut just nu</small></span></li>
+        <li><span class="key">↩ Återställ</span><span><code>git restore .</code><small>tillbaka till senaste sparningen</small></span></li>
+      </ul>
+      <p>Fastnade du? Ingen panik, ladda bara om. Klicka på en gammal sparpunkt i trädet för att gå ännu längre tillbaka.</p>
+      <p class="note">Proffstips: spara inte när du sitter fast i gropen. 😅</p>
     </div>
     <div class="col">
       <div class="panel">
-        <div class="file-head"><span>Spel.java</span><span class="dirty" id="git-dirty" hidden>● ändrad</span></div>
-        <pre class="code editor" id="git-file" data-lang="java"></pre>
+        <canvas id="game" width="560" height="300" tabindex="0" aria-label="Plattformsspel: klicka och styr med piltangenterna och mellanslag"></canvas>
         <div class="controls">
-          <button class="btn ghost" id="git-write">Skriv kod</button>
-          <button class="btn" id="git-commit">git commit</button>
-          <button class="btn danger" id="git-break">Förstör allt</button>
+          <button class="btn" id="git-save">💾 Spara</button>
+          <button class="btn ghost" id="git-restore">↩ Återställ</button>
+          <span class="pad">
+            <button class="btn ghost" data-hold="left" aria-label="Vänster">◀</button>
+            <button class="btn ghost" data-hold="jump" aria-label="Hoppa">⤒</button>
+            <button class="btn ghost" data-hold="right" aria-label="Höger">▶</button>
+          </span>
         </div>
         <div class="timeline" id="git-timeline"></div>
         <div class="term small" id="git-log"></div>

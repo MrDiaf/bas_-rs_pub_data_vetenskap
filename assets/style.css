@@ -150,12 +150,17 @@ pre.code {
 
 /* ---------- git ---------- */
 .shout { font-size: 88px; color: var(--c); transform: rotate(-2deg); transform-origin: left; text-shadow: 0 0 40px color-mix(in srgb, var(--c) 40%, transparent); }
-.howto { font-size: 18px; color: var(--muted); line-height: 1.8; padding-left: 22px; margin: 4px 0 0; }
-.file-head { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 13px; color: var(--muted); margin-bottom: 8px; }
-.dirty { color: var(--c-oop); }
-.editor { height: 196px; font-size: 14px; }
-.editor .broken { color: var(--red); text-decoration: wavy underline; }
-.timeline { display: flex; align-items: center; gap: 0; margin-top: 16px; min-height: 44px; overflow: hidden; }
+.git-split { grid-template-columns: 1fr 600px; gap: 40px; }
+.savelist { list-style: none; padding: 0; margin: 0 0 16px; display: flex; flex-direction: column; gap: 10px; }
+.savelist li { font-size: 17px; color: var(--muted); display: grid; grid-template-columns: 130px 1fr; align-items: start; gap: 10px; }
+.savelist small { display: block; font-size: 15px; margin-top: 4px; }
+#git .term.small { height: 112px; }
+.savelist .key { background: var(--c); color: #111; font-weight: 700; padding: 4px 10px; border-radius: 8px; text-align: center; }
+#game { display: block; width: 100%; aspect-ratio: 560 / 300; border-radius: 8px; background: #0a0f1c; cursor: pointer; outline: none; }
+#game:focus-visible { box-shadow: 0 0 0 2px var(--c); }
+.pad { margin-left: auto; display: flex; gap: 6px; }
+.pad .btn { padding: 8px 12px; touch-action: none; user-select: none; }
+.timeline { display: flex; align-items: center; gap: 0; margin-top: 12px; min-height: 36px; overflow: hidden; }
 .commit { position: relative; display: flex; align-items: center; }
 .commit + .commit::before { content: ""; width: 26px; height: 3px; background: var(--line); }
 .commit button { width: 30px; height: 30px; border-radius: 50%; border: 3px solid var(--c); background: var(--bg); font-family: var(--mono); font-size: 10px; padding: 0; color: var(--muted); }

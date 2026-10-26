@@ -163,52 +163,159 @@ demos.refactor = (() => {
 })();
 
 demos.git = (() => {
-  const POOL = ['class Spel {', '  int poäng = 0;', '  void hoppa() {', '    y -= 10;', '  }', '  void träffa() {', '    poäng++;', '  }', '}'];
-  const GARBAGE = ['§clas Spel {{{', '§  int poäng = "många";', '§  void hoppa( {', '§    y -= ???;', '§}}'];
-  const fileEl = $('#git-file'), tl = $('#git-timeline'), logEl = $('#git-log'), dirtyEl = $('#git-dirty');
-  let lines, commits, head, dirty, poolI;
+  const cv = $('#game'), ctx = cv.getContext('2d'), W = cv.width, H = cv.height;
+  const tl = $('#git-timeline'), logEl = $('#git-log');
+  const GROUND = 200, FLOOR = H - 12, PW = 16, PH = 20;
+  const SPEED = 2.6, JUMP = 7.6, G = 0.42;   // max jump height ≈ 69px, the pits are 88px deep
+  const SOLIDS = [
+    { x: 0, y: GROUND, w: 170, h: H - GROUND },
+    { x: 240, y: GROUND, w: 100, h: H - GROUND },
+    { x: 480, y: GROUND, w: 80, h: H - GROUND },
+    { x: 262, y: 140, w: 50, h: 10 },
+    { x: 370, y: 145, w: 60, h: 10 },
+    { x: 0, y: FLOOR, w: W, h: 12 },
+  ];
+  const COINS = [{ x: 90, y: 178 }, { x: 205, y: 272 }, { x: 287, y: 122 }, { x: 400, y: 126 }];
+  const FLAG_X = 535;
+  const STARS = Array.from({ length: 40 }, () => [Math.random() * W, Math.random() * 150, Math.random() * 1.5 + 0.5]);
+  const keys = { left: false, right: false, jump: false };
+  let p, coins, commits, head, raf = 0, acc = 0, prev = 0, t = 0, focused = false, played = false;
 
   const hash = () => Math.random().toString(16).slice(2, 9);
+  const hits = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  const stuck = () => p.onGround && p.y + PH >= FLOOR - 0.5;
+  const won = () => p.x + PW > FLAG_X;
+  const nCoins = () => coins.filter(Boolean).length;
+  const snapshot = () => ({ x: p.x, y: p.y, coins: [...coins] });
+  function load(s) { p = { x: s.x, y: s.y, vx: 0, vy: 0, onGround: true, dir: 1 }; coins = [...s.coins]; }
+  function where() {
+    if (stuck()) return 'sitter fast i gropen 😅';
+    if (won()) return 'i mål!';
+    if (p.y + PH <= 160) return 'uppe på en plattform';
+    if (p.x < 170) return 'vid starten';
+    if (p.x < 340) return 'efter första gropen';
+    return 'nästan framme';
+  }
   function log(html) { logEl.innerHTML += html + '\n'; logEl.scrollTop = logEl.scrollHeight; }
-  function render() {
-    fileEl.innerHTML = lines.map(l => l[0] === '§' ? `<span class="broken">${esc(l.slice(1))}</span>` : highlight(l, 'java')).join('\n');
-    fileEl.scrollTop = fileEl.scrollHeight;
-    dirtyEl.hidden = !dirty;
+  function renderTree() {
     const shown = commits.slice(-9), off = commits.length - shown.length;
     tl.innerHTML = shown.map((c, k) => `<div class="commit${k + off === head ? ' head' : ''}"><button data-c="${k + off}" title="${esc(c.msg)}">${k + off}</button></div>`).join('');
   }
-  function reset() {
-    lines = ['// Spel.java']; poolI = 0; dirty = false;
-    commits = [{ id: hash(), msg: 'första commit', lines: [...lines] }]; head = 0;
-    logEl.innerHTML = '<span class="dim">$ git init && git commit -m "första commit"</span>\n';
-    render();
+
+  function save() {
+    const c = { id: hash(), msg: `${where()} (${nCoins()} mynt)`, state: snapshot() };
+    commits.push(c); head = commits.length - 1;
+    log(`<span class="p">$ git add .</span>\n<span class="p">$ git commit -m "${esc(c.msg)}"</span>\n<span class="ok">[main ${c.id}]</span> sparpunkt ${head}`);
+    renderTree();
   }
-  $('#git-write').onclick = () => {
-    lines = lines.filter(l => l[0] !== '§');
-    lines.push(poolI < POOL.length ? POOL[poolI++] : `// ny idé #${poolI++ - POOL.length + 1}`);
-    dirty = true; render();
-  };
-  $('#git-commit').onclick = () => {
-    if (!dirty) { log('<span class="p">$ git commit</span>\n<span class="dim">nothing to commit, working tree clean</span>'); return; }
-    const broken = lines.some(l => l[0] === '§');
-    const c = { id: hash(), msg: broken ? 'fixade nog allt (?)' : `lägg till rad ${lines.length}`, lines: [...lines] };
-    commits.push(c); head = commits.length - 1; dirty = false;
-    log(`<span class="p">$ git commit -m "${esc(c.msg)}"</span>\n<span class="ok">[main ${c.id}]</span> ${esc(c.msg)}`);
-    render();
-  };
-  $('#git-break').onclick = () => {
-    lines = ['// Spel.java', ...GARBAGE]; dirty = true; render();
-    log('<span class="err">error: 47 errors. Allt är trasigt. 😱</span>');
-  };
-  tl.addEventListener('click', e => {
-    const b = e.target.closest('[data-c]'); if (!b) return;
-    head = +b.dataset.c; const c = commits[head];
-    lines = [...c.lines]; dirty = false;
-    log(`<span class="p">$ git checkout ${c.id}</span>\n<span class="ok">HEAD är nu på ${c.id}</span> ${esc(c.msg)}: koden är räddad!`);
-    render();
+  function restore(i) {
+    const c = commits[i];
+    head = i; load(c.state);
+    log(i === commits.length - 1
+      ? `<span class="p">$ git restore .</span>\n<span class="ok">Tillbaka till sparpunkt ${i}:</span> ${esc(c.msg)}`
+      : `<span class="p">$ git restore --source=${c.id} .</span>\n<span class="ok">Tillbaka till sparpunkt ${i}:</span> ${esc(c.msg)}`);
+    if (stuck()) log('<span class="err">…du sparade i gropen. Välj en äldre sparpunkt i trädet!</span>');
+    renderTree();
+  }
+  function reset() {
+    load({ x: 30, y: GROUND - PH, coins: COINS.map(() => false) });
+    commits = [{ id: hash(), msg: 'start', state: snapshot() }]; head = 0;
+    logEl.innerHTML = '<span class="dim">$ git init && git commit -m "start"</span>\n';
+    renderTree();
+  }
+
+  function step() {
+    p.vx = (keys.right - keys.left) * SPEED;
+    if (p.vx) p.dir = Math.sign(p.vx);
+    if (keys.jump && p.onGround) p.vy = -JUMP;
+    p.vy = Math.min(p.vy + G, 10);
+    p.x = Math.max(0, Math.min(W - PW, p.x + p.vx));
+    for (const s of SOLIDS) if (hits({ x: p.x, y: p.y, w: PW, h: PH }, s)) p.x = p.vx > 0 ? s.x - PW : s.x + s.w;
+    p.y += p.vy; p.onGround = false;
+    for (const s of SOLIDS) {
+      if (!hits({ x: p.x, y: p.y, w: PW, h: PH }, s)) continue;
+      if (p.vy > 0) { p.y = s.y - PH; p.onGround = true; } else p.y = s.y + s.h;
+      p.vy = 0;
+    }
+    COINS.forEach((c, i) => { if (!coins[i] && hits({ x: p.x, y: p.y, w: PW, h: PH }, { x: c.x - 7, y: c.y - 7, w: 14, h: 14 })) coins[i] = true; });
+  }
+
+  function drawPlayer(x, y, dir, alpha, label) {
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = '#38bdf8';
+    ctx.beginPath(); ctx.roundRect(x, y, PW, PH, 5); ctx.fill();
+    ctx.fillStyle = '#0a0f1c';
+    ctx.fillRect(x + (dir > 0 ? 8 : 3), y + 5, 2, 5); ctx.fillRect(x + (dir > 0 ? 12 : 7), y + 5, 2, 5);
+    if (label != null) {
+      ctx.fillStyle = '#f4623a'; ctx.font = '600 11px JetBrains Mono, monospace'; ctx.textAlign = 'center';
+      ctx.fillText('💾' + label, x + PW / 2, y - 6); ctx.textAlign = 'start';
+    }
+    ctx.globalAlpha = 1;
+  }
+  function banner(text, color) {
+    ctx.fillStyle = '#0a0f1ccc'; ctx.fillRect(0, 50, W, 44);
+    ctx.fillStyle = color; ctx.font = '700 18px Space Grotesk, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(text, W / 2, 78); ctx.textAlign = 'start';
+  }
+  function draw() {
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#0b1024'); sky.addColorStop(1, '#1a1433');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#ffffff55';
+    for (const [x, y, r] of STARS) ctx.fillRect(x, y, r, r);
+    for (const s of SOLIDS) {
+      const mud = s.y === FLOOR;
+      ctx.fillStyle = mud ? '#4a2f1a' : '#24304a'; ctx.fillRect(s.x, s.y, s.w, s.h);
+      ctx.fillStyle = mud ? '#6b4423' : '#4ade80'; ctx.fillRect(s.x, s.y, s.w, 3);
+    }
+    ctx.fillStyle = '#a0784e'; ctx.font = '10px JetBrains Mono, monospace';
+    ctx.fillText('klibbig lera', 175, H - 2);
+    ctx.fillStyle = '#cbd5e1'; ctx.fillRect(FLAG_X, GROUND - 46, 3, 46);
+    ctx.fillStyle = '#f4623a'; ctx.beginPath(); ctx.moveTo(FLAG_X + 3, GROUND - 46); ctx.lineTo(FLAG_X + 24, GROUND - 39); ctx.lineTo(FLAG_X + 3, GROUND - 32); ctx.fill();
+    COINS.forEach((c, i) => {
+      if (coins[i]) return;
+      ctx.fillStyle = '#facc15'; ctx.beginPath(); ctx.arc(c.x, c.y + Math.sin(t / 12 + i) * 2, 6, 0, 7); ctx.fill();
+    });
+    commits.forEach((c, i) => drawPlayer(c.state.x, c.state.y, 1, i === head ? 0.45 : 0.22, i));
+    drawPlayer(p.x, p.y, p.dir, 1);
+    ctx.fillStyle = '#e8eaf0'; ctx.font = '600 13px JetBrains Mono, monospace';
+    ctx.fillText(`mynt ${nCoins()}/${COINS.length}`, 10, 20);
+    if (won()) banner('🏁 Banan klar! Klicka på sparpunkt 0 för att köra igen.', '#4ade80');
+    else if (stuck()) banner('Du sitter fast! 😵  Tryck ↩ Återställ', '#f87171');
+    else if (!played && !focused) banner('Klicka här och spela: ← → springa, mellanslag hoppa', '#e8eaf0');
+  }
+  function loop(now) {
+    acc += Math.min(100, now - (prev || now)); prev = now;
+    while (acc >= 1000 / 60) { if (!won()) step(); t++; acc -= 1000 / 60; }
+    draw();
+    raf = requestAnimationFrame(loop);
+  }
+
+  const KEYMAP = { ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right', ArrowUp: 'jump', w: 'jump', ' ': 'jump' };
+  cv.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { cv.blur(); return; }
+    if (e.key === 's') { save(); return; }
+    if (e.key === 'r') { restore(head); return; }
+    const k = KEYMAP[e.key]; if (!k) return;
+    keys[k] = true; played = true; e.preventDefault();
   });
+  cv.addEventListener('keyup', e => { const k = KEYMAP[e.key]; if (k) keys[k] = false; });
+  cv.addEventListener('focus', () => { focused = true; });
+  cv.addEventListener('blur', () => { focused = false; keys.left = keys.right = keys.jump = false; });
+  cv.addEventListener('pointerdown', () => cv.focus());
+  $$('[data-hold]').forEach(b => {
+    const set = v => e => { keys[b.dataset.hold] = v; if (v) played = true; e.preventDefault(); };
+    b.addEventListener('pointerdown', set(true));
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, set(false)));
+  });
+  $('#git-save').onclick = () => { save(); cv.focus(); };
+  $('#git-restore').onclick = () => { restore(head); cv.focus(); };
+  tl.addEventListener('click', e => { const b = e.target.closest('[data-c]'); if (b) restore(+b.dataset.c); });
   reset();
-  return { start() {}, stop() {} };
+  return {
+    start() { prev = 0; raf = requestAnimationFrame(loop); },
+    stop() { cancelAnimationFrame(raf); cv.blur(); },
+  };
 })();
 
 demos.app = (() => {
@@ -585,7 +692,7 @@ function go(i) {
 addEventListener('resize', fit);
 addEventListener('keydown', e => {
   const t = e.target;
-  if (t.matches('textarea, select, input:not([type=checkbox])') || e.altKey || e.ctrlKey || e.metaKey) return;
+  if (t.matches('textarea, select, canvas, input:not([type=checkbox])') || e.altKey || e.ctrlKey || e.metaKey) return;
   const onButton = t.matches('button, label, input');
   switch (e.key) {
     case 'ArrowRight': case 'PageDown': go(cur + 1); break;

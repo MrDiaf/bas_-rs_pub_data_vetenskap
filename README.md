@@ -10,7 +10,7 @@ Varje bild har något att klicka på:
 | --- | --- |
 | IPC | Game of Life som körs live, plus samma loop i C, Python och Java |
 | OOP Java | Refaktorering i tre steg: spagetti → klass → återanvänd i ett nytt projekt |
-| Git | Skriv, committa, förstör, res tillbaka i tiden |
+| Git | Plattformsspel där du fastnar i en grop: 💾 Spara (`git add` + `git commit`) och ↩ Återställ (`git restore`) |
 | App Java | En att-göra-app med en "röntgen" som visar datan bakom |
 | make | Terminal som kör den här Makefilen, plus ett tips för vibekodning |
 | Trådar | Mandelbrot som räknas ut av 1–8 simulerade trådar |
