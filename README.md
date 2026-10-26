@@ -15,7 +15,7 @@ Varje bild har något att klicka på:
 | make | Terminal som kör den här Makefilen, plus ett tips för vibekodning |
 | Trådar | Mandelbrot som räknas ut av 1–8 simulerade trådar |
 | Signaler | Signal/slot som i spelmotorer, där du kopplar in och ur lyssnare |
-| Databaser | Hur en förfrågan går genom servern, plus klickbara SQL-frågor |
+| Databaser | Hästinder: swipea på hästar och se `swipes` och `matches` fyllas i databasen live |
 | Inbyggda | 8 lysdioder som ett register, och en servo som slår till väckarklockan |
 | PVT | En git-graf för ett team, steg för steg |
 

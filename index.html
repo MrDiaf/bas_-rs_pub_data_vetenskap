@@ -258,26 +258,24 @@ for (int dy = -1; dy &lt;= 1; dy++)
 <section class="slide" id="db" data-demo="db" data-title="Databaser" style="--c:var(--c-db)">
   <span class="tag">Introduktion till databaser</span>
   <h2>Hosta din egen server, och en hemsida <span class="hl">som den här!</span></h2>
-  <p class="lead-s">Du tittar just nu på <code id="db-url">…</code>. Klicka på "Skicka förfrågan" och följ vad som händer.</p>
-  <div class="flow" id="db-flow">
-    <div class="node" data-i="0"><b>Webbläsare</b><span>du</span></div>
-    <div class="node" data-i="1"><b>Webbserver</b><span id="db-host">people.cs.umu.se</span></div>
-    <div class="node" data-i="2"><b>PHP</b><span>kör din kod</span></div>
-    <div class="node" data-i="3"><b>SQLite</b><span>sparar data</span></div>
-    <div class="packet" id="db-packet"></div>
-  </div>
-  <div class="flow-ctl">
-    <button class="btn" id="db-send">Skicka förfrågan</button>
-    <span class="flow-msg" id="db-msg"></span>
-  </div>
-  <div class="sql">
-    <div class="sql-q">
-      <button class="btn ghost mono" data-q="all">SELECT * FROM kurser;</button>
-      <button class="btn ghost mono" data-q="java">… WHERE sprak = 'Java';</button>
-      <button class="btn ghost mono" data-q="order">… ORDER BY namn;</button>
-      <button class="btn ghost mono" data-q="count">SELECT sprak, COUNT(*) … GROUP BY sprak;</button>
+  <p class="lead-s">Du tittar just nu på <code id="db-url">…</code>. Här är en annan sida du kan bygga: <b>Hästinder</b>. Swipea, och se vad som sparas i databasen.</p>
+  <div class="tinder">
+    <div class="ht-app">
+      <div class="ht-bar">🐴 Hästinder</div>
+      <div class="ht-deck" id="ht-deck"></div>
+      <div class="ht-btns">
+        <button class="ht-no" id="ht-no" aria-label="Nej">✕</button>
+        <button class="ht-yes" id="ht-yes" aria-label="Gilla">♥</button>
+      </div>
     </div>
-    <table class="sql-t" id="db-table"></table>
+    <div class="ht-db">
+      <div class="term ht-log" id="ht-log" aria-live="polite"></div>
+      <div class="ht-tables">
+        <div><div class="ht-tname">swipes</div><table class="sql-t" id="ht-swipes"></table></div>
+        <div><div class="ht-tname">matches 💘</div><table class="sql-t" id="ht-matches"></table></div>
+      </div>
+      <p class="note">En match = båda gillar varandra. Ditt svar sparas i <code>swipes</code>, hästens finns redan i <code>hastar.gillar_dig</code>. Databasen kommer ihåg allt, även när du stänger sidan.</p>
+    </div>
   </div>
 </section>
 

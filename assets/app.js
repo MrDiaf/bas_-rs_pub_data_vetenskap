@@ -509,65 +509,100 @@ demos.signals = (() => {
 })();
 
 demos.db = (() => {
-  const nodes = $$('#db-flow .node'), packet = $('#db-packet'), msg = $('#db-msg');
   $('#db-url').textContent = location.protocol === 'file:' ? 'en fil på din dator (inte hostad än!)' : location.href.split('#')[0];
-  $('#db-host').textContent = location.host ? location.host : 'people.cs.umu.se';
-  let token = 0;
-  async function send() {
-    const my = ++token;
-    const path = location.pathname || '/';
-    const STEPS = [
-      [0, `GET ${path}`],
-      [1, 'Servern letar upp filen i ~/public_html/…'],
-      [2, 'PHP kör koden (om sidan är .php)'],
-      [3, 'SELECT * FROM kurser;'],
-      [2, 'PHP bygger HTML av svaret'],
-      [1, '200 OK, skickar sidan'],
-      [0, 'Sidan visas. Det är den du tittar på nu!'],
-    ];
-    packet.style.opacity = 1;
-    for (const [i, text] of STEPS) {
-      if (my !== token) return;
-      const n = nodes[i];
-      packet.style.left = (n.offsetLeft + n.offsetWidth / 2) + 'px';
-      nodes.forEach(x => x.classList.toggle('lit', x === n));
-      msg.textContent = text;
-      await sleep(900);
-    }
-    if (my !== token) return;
-    packet.style.opacity = 0; nodes.forEach(x => x.classList.remove('lit'));
-    msg.textContent = 'Den här presentationen är ren HTML, så servern skickar filen direkt. Med PHP + SQLite kan sidan spara data.';
-  }
-  $('#db-send').onclick = send;
-
-  const KURSER = [
-    { namn: 'IPC', sprak: 'C', fokus: 'mönster' },
-    { namn: 'OOP', sprak: 'Java', fokus: 'återanvändning' },
-    { namn: 'App', sprak: 'Java', fokus: 'frontend' },
-    { namn: 'Systemnära', sprak: 'C', fokus: 'make, trådar' },
-    { namn: 'Databaser', sprak: 'SQL', fokus: 'hosting' },
-    { namn: 'Inbyggda', sprak: 'C', fokus: 'hårdvara' },
-    { namn: 'PVT', sprak: 'Flera', fokus: 'team' },
+  // gillar_dig is the horse's side of the match, stored in the hastar table
+  const HASTAR = [
+    { namn: 'Blixten', alder: 7, face: '🐎', bg: '#fde68a', bio: 'Gillar långa galopper på stranden.', gillar_dig: 1 },
+    { namn: 'Pålle', alder: 12, face: '🐴', bg: '#d9f99d', bio: 'Lugn och stabil. Äter mest.', gillar_dig: 0 },
+    { namn: 'Stjärna', alder: 5, face: '🐴', bg: '#bfdbfe', bio: 'Söker någon att dela min höbal med.', gillar_dig: 1 },
+    { namn: 'Silverpilen', alder: 9, face: '🏇', bg: '#e9d5ff', bio: 'Tävlar i hoppning. Hoppar även över känslor.', gillar_dig: 0 },
+    { namn: 'Majken', alder: 4, face: '🐴', bg: '#fecdd3', bio: 'Nyfiken på allt. Speciellt morötter. 🥕', gillar_dig: 1 },
+    { namn: 'Disco', alder: 6, face: '🦄', bg: '#fbcfe8', bio: 'Enhörning (typ). Gillar glitter.', gillar_dig: 0 },
+    { namn: 'Kungen', alder: 15, face: '🐎', bg: '#fed7aa', bio: 'Gammal men vis. Swipea höger.', gillar_dig: 1 },
   ];
-  const QUERIES = {
-    all: () => KURSER,
-    java: () => KURSER.filter(k => k.sprak === 'Java'),
-    order: () => [...KURSER].sort((a, b) => a.namn.localeCompare(b.namn, 'sv')),
-    count: () => Object.entries(KURSER.reduce((m, k) => (m[k.sprak] = (m[k.sprak] || 0) + 1, m), {}))
-      .map(([sprak, n]) => ({ sprak, 'COUNT(*)': n })),
-  };
-  function query(q) {
-    $$('[data-q]').forEach(b => b.classList.toggle('active', b.dataset.q === q));
-    const rows = QUERIES[q](), cols = Object.keys(rows[0]);
-    $('#db-table').innerHTML = `<tr>${cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr>` +
-      rows.map(r => `<tr class="in">${cols.map(c => `<td>${esc(r[c])}</td>`).join('')}</tr>`).join('');
+  const deck = $('#ht-deck'), logEl = $('#ht-log');
+  let i, swipes, matches, busy;
+
+  const sql = s => `<span class="sql">${esc(s)}</span>`;
+  function log(lines) { logEl.innerHTML += lines.join('\n') + '\n\n'; logEl.scrollTop = logEl.scrollHeight; }
+  function table(el, cols, rows, fresh) {
+    el.innerHTML = `<tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr>` + (rows.length
+      ? rows.slice(-7).map((r, k, a) => `<tr class="${fresh && k === a.length - 1 ? 'in' : ''}">${cols.map(c => `<td>${esc(r[c])}</td>`).join('')}</tr>`).join('')
+      : `<tr><td class="empty" colspan="${cols.length}">(tom)</td></tr>`);
   }
-  $$('[data-q]').forEach(b => b.addEventListener('click', () => query(b.dataset.q)));
-  query('all');
-  return {
-    start() {},
-    stop() { token++; packet.style.opacity = 0; nodes.forEach(x => x.classList.remove('lit')); msg.textContent = ''; },
-  };
+  function renderCard() {
+    const h = HASTAR[i];
+    if (!h) {
+      deck.innerHTML = `<div class="ht-empty"><div style="font-size:48px">🌾</div>Inga fler hästar i stallet.<br>${matches.length} match${matches.length === 1 ? '' : 'er'}!<button class="btn" id="ht-reset">Börja om</button></div>`;
+      $('#ht-reset').onclick = reset;
+      return;
+    }
+    deck.innerHTML = `<div class="ht-card" style="--bg-c:${h.bg}">
+      <span class="stamp yes">GILLA</span><span class="stamp no">NEJ</span>
+      <div class="face">${h.face}</div><b>${esc(h.namn)} <span>${h.alder} år</span></b><p>${esc(h.bio)}</p></div>`;
+    drag($('.ht-card', deck));
+  }
+  async function swipe(like) {
+    const h = HASTAR[i], card = $('.ht-card', deck);
+    if (!h || busy) return;
+    busy = true;
+    card.style.transform = `translateX(${like ? 360 : -360}px) rotate(${like ? 25 : -25}deg)`;
+    card.style.opacity = 0;
+    swipes.push({ hast: h.namn, gillar: like ? 1 : 0 });
+    table($('#ht-swipes'), ['hast', 'gillar'], swipes, true);
+    const lines = [
+      `<span class="dim">POST api/swipe.php  { hast: "${esc(h.namn)}", gillar: ${like} }</span>`,
+      sql(`INSERT INTO swipes (hast, gillar) VALUES ('${h.namn}', ${like ? 1 : 0});`),
+    ];
+    const match = like && h.gillar_dig;
+    if (like) lines.push(sql(`SELECT gillar_dig FROM hastar WHERE namn = '${h.namn}';`) + `  <span class="dim">→ ${h.gillar_dig}</span>`);
+    if (match) {
+      matches.push({ hast: h.namn, tid: new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' }) });
+      lines.push(sql(`INSERT INTO matches (hast) VALUES ('${h.namn}');`) + '  <span class="ok">💘 match!</span>');
+      table($('#ht-matches'), ['hast', 'tid'], matches, true);
+    }
+    log(lines);
+    await sleep(350);
+    i++; renderCard();
+    if (match) {
+      deck.insertAdjacentHTML('beforeend', `<div class="ht-match">Det är en match! 💘<small>Du och ${esc(h.namn)} gillar varandra</small></div>`);
+      await sleep(1300);
+      $('.ht-match', deck)?.remove();
+    }
+    busy = false;
+  }
+  function drag(card) {
+    let x0 = null, dx = 0;
+    const stamps = [$('.stamp.yes', card), $('.stamp.no', card)];
+    card.addEventListener('pointerdown', e => { x0 = e.clientX; card.setPointerCapture(e.pointerId); card.classList.add('dragging'); });
+    card.addEventListener('pointermove', e => {
+      if (x0 == null) return;
+      const r = card.getBoundingClientRect(), scale = r.width / card.offsetWidth || 1;   // the stage is scaled
+      dx = (e.clientX - x0) / scale;
+      card.style.transform = `translateX(${dx}px) rotate(${dx / 15}deg)`;
+      stamps[0].style.opacity = Math.max(0, dx / 80); stamps[1].style.opacity = Math.max(0, -dx / 80);
+    });
+    const end = () => {
+      if (x0 == null) return;
+      x0 = null; card.classList.remove('dragging');
+      if (Math.abs(dx) > 80) swipe(dx > 0);
+      else { card.style.transform = ''; stamps.forEach(s => { s.style.opacity = 0; }); }
+      dx = 0;
+    };
+    card.addEventListener('pointerup', end);
+    card.addEventListener('pointercancel', end);
+  }
+  function reset() {
+    i = 0; swipes = []; matches = []; busy = false;
+    logEl.innerHTML = `<span class="dim"># Databasen (SQLite) på servern. Swipea till vänster!</span>\n\n`;
+    table($('#ht-swipes'), ['hast', 'gillar'], swipes);
+    table($('#ht-matches'), ['hast', 'tid'], matches);
+    renderCard();
+  }
+  $('#ht-yes').onclick = () => swipe(true);
+  $('#ht-no').onclick = () => swipe(false);
+  reset();
+  return { start() {}, stop() {} };
 })();
 
 demos.emb = (() => {
